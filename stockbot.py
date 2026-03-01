@@ -6,6 +6,7 @@ import ta
 TOKEN = "8719143523:AAEfud5TmcTbVlSpwqCH7AcloYl9B_I9M0M"
 CHAT_ID = "699079139"
 
+
 # -------------------- STOCKS BY SECTOR --------------------
 sectors = {
     "IT": ["TCS.NS","INFY.NS","WIPRO.NS","HCLTECH.NS","TECHM.NS"],
@@ -24,8 +25,9 @@ def get_score(ticker):
             print(f"{ticker}: Not enough data")
             return None
 
-        close = df["Close"]   # use Series directly
-        volume = df["Volume"]
+        # Ensure close and volume are 1D Series
+        close = df["Close"].iloc[:,0] if isinstance(df["Close"], pd.DataFrame) else df["Close"]
+        volume = df["Volume"].iloc[:,0] if isinstance(df["Volume"], pd.DataFrame) else df["Volume"]
 
         ma50 = close.rolling(50).mean()
         ma200 = close.rolling(200).mean()
@@ -35,22 +37,14 @@ def get_score(ticker):
         vol_avg = volume.rolling(20).mean()
 
         score = 0
-
-        # Trend
         if not ma50.empty and close.iloc[-1] > ma50.iloc[-1]:
             score += 2
         if not ma200.empty and close.iloc[-1] > ma200.iloc[-1]:
             score += 2
-
-        # RSI
         if not rsi.empty and 50 < rsi.iloc[-1] < 70:
             score += 2
-
-        # Momentum
         if not momentum_1m.empty and momentum_1m.iloc[-1] > 0:
             score += 2
-
-        # Volume confirmation
         if not vol_avg.empty and volume.iloc[-1] > vol_avg.iloc[-1]:
             score += 2
 
@@ -78,7 +72,7 @@ for sector_name, stocks in sectors.items():
         print(f"No valid scores for {sector_name}")
         continue
 
-    # Sort stocks by score
+    # Sort stocks by score descending
     ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
     message += f"\n📌 {sector_name}\n"
