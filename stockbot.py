@@ -63,17 +63,7 @@ def get_score(ticker):
 message = "📊 STOCK AI REPORT\n"
 message += "Updated Every 6 Hours\n"
 message += "---------------------------\n"
-nifty = yf.download("^NSEI", period="6mo", interval="1d", auto_adjust=True)
-nifty_close = nifty["Close"].squeeze()
-nifty_ma200 = nifty_close.rolling(200).mean()
 
-if nifty_close.iloc[-1] > nifty_ma200.iloc[-1]:
-    market_status = "🟢 Market Trend: BULLISH"
-else:
-    market_status = "🔴 Market Trend: BEARISH"
-
-message += market_status + "\n"
-message += "===========================\n"
 for sector, stocks in sectors.items():
     scores = {}
 
@@ -97,6 +87,7 @@ for sector, stocks in sectors.items():
         message += f"{r[0]} (Score: {r[1]}/10)\n"
 
     message += "---------------------------\n"
+    
 
 url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
 payload = {
