@@ -1,12 +1,12 @@
 import yfinance as yf
 import pandas as pd
-from telegram import Bot
+import requests
 import ta
 
 TOKEN = "8719143523:AAEfud5TmcTbVlSpwqCH7AcloYl9B_I9M0M"
 CHAT_ID = "699079139"
 
-bot = Bot(TOKEN)
+
 
 sectors = {
     "IT": ["TCS.NS","INFY.NS","WIPRO.NS","HCLTECH.NS","TECHM.NS"],
@@ -60,4 +60,10 @@ for sector, stocks in sectors.items():
     for r in ranked[-5:]:
         message += r[0] + "\n"
 
-bot.send_message(chat_id=CHAT_ID, text=message)
+url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+payload = {
+    "chat_id": CHAT_ID,
+    "text": message
+}
+
+requests.post(url, data=payload)
