@@ -18,17 +18,29 @@ sectors = {
 }
 
 def get_score(ticker):
-    df = yf.download(ticker, period="3mo", interval="1d")
-    if len(df) < 50:
+    df = yf.download(ticker, period="3mo", interval="1d", auto_adjust=True)
+
+    if df.empty or len(df) < 50:
         return None
-    df["rsi"] = ta.momentum.RSIIndicator(df["Close"]).rsi()
-    df["ma50"] = df["Close"].rolling(50).mean()
-    last = df.iloc[-1]
+
+    # Make sure Close is 1D
+    close = df["Close"].squeeze()
+
+    # Calculate indicators safely
+    rsi = ta.momentum.RSIIndicator(close).rsi()
+    ma50 = close.rolling(50).mean()
+
+    last_close = close.iloc[-1]
+    last_rsi = rsi.iloc[-1]
+    last_ma50 = ma50.iloc[-1]
+
     score = 0
-    if last["Close"] > last["ma50"]:
+
+    if last_close > last_ma50:
         score += 1
-    if last["rsi"] < 70:
+    if last_rsi < 70:
         score += 1
+
     return score
 
 message = "📊 Stock AI Report\n\n"
